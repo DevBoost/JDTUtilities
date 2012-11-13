@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/de.devboost.eclipse.jdtutilites_0.0.0.v0.jar" id="de.devboost.eclipse.jdtutilites" version="0.0.0.v0">
+      <category name="JDTUtilities"/>
+   </feature>
+   <category-def name="JDTUtilities" label="JDTUtilities">
+      <description>
+         JDTUtilities - A set of utility classes that ease working with the Eclipse JDT.
+      </description>
+   </category-def>
+</site>
