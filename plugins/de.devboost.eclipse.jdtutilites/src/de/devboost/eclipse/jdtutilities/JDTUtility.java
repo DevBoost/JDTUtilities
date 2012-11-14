@@ -11,7 +11,7 @@
  *   DevBoost GmbH - Berlin, Germany
  *      - initial API and implementation
  ******************************************************************************/
-package de.devboost.eclipse.jdtutilites;
+package de.devboost.eclipse.jdtutilities;
 
 import java.util.ArrayList;
 import java.util.Collection;
