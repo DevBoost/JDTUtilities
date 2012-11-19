@@ -120,7 +120,7 @@ public class JDTUtility {
 		return getAnnotationPropertyValue(annotation, annotationProperty);
 	}
 
-	private Object getAnnotationPropertyValue(IAnnotation annotation,
+	public Object getAnnotationPropertyValue(IAnnotation annotation,
 			String annotationProperty) {
 		try {
 			IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
