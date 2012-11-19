@@ -114,6 +114,14 @@ public class JDTUtility {
 	public Object getAnnotationValue(IAnnotatable annotable, String simpleAnnotationName,
 			String annotationProperty) {
 		IAnnotation annotation = annotable.getAnnotation(simpleAnnotationName);
+		if (annotation == null) {
+			return null;
+		}
+		return getAnnotationPropertyValue(annotation, annotationProperty);
+	}
+
+	private Object getAnnotationPropertyValue(IAnnotation annotation,
+			String annotationProperty) {
 		try {
 			IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
 			for (IMemberValuePair memberValuePair : memberValuePairs) {
