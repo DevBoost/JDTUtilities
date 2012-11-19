@@ -21,9 +21,13 @@ import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 public class JDTUtility {
 
@@ -74,5 +78,27 @@ public class JDTUtility {
 			}
 		}
 		return result.toString();
+	}
+
+	/**
+	 * Returns the value of the given annotation property. If no annotation or
+	 * property is found, null is returned.
+	 */
+	public String getAnnotationValue(IAnnotatable annotable, String simpleAnnotationName,
+			String annotationProperty) {
+		IAnnotation annotation = annotable.getAnnotation(simpleAnnotationName);
+		try {
+			IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
+			for (IMemberValuePair memberValuePair : memberValuePairs) {
+				String memberName = memberValuePair.getMemberName();
+				Object value = memberValuePair.getValue();
+				if (annotationProperty.equals(memberName)) {
+					return value.toString();
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}
+		return null;
 	}
 }
