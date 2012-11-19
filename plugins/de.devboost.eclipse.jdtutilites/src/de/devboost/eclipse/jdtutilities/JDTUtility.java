@@ -111,16 +111,16 @@ public class JDTUtility {
 	 * Returns the value of the given annotation property. If no annotation or
 	 * property is found, null is returned.
 	 */
-	public String getAnnotationValue(IAnnotatable annotable, String simpleAnnotationName,
+	public Object getAnnotationValue(IAnnotatable annotable, String simpleAnnotationName,
 			String annotationProperty) {
 		IAnnotation annotation = annotable.getAnnotation(simpleAnnotationName);
 		try {
 			IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
 			for (IMemberValuePair memberValuePair : memberValuePairs) {
 				String memberName = memberValuePair.getMemberName();
-				Object value = memberValuePair.getValue();
 				if (annotationProperty.equals(memberName)) {
-					return value.toString();
+					Object value = memberValuePair.getValue();
+					return value;
 				}
 			}
 		} catch (JavaModelException e) {
