@@ -15,8 +15,11 @@
  ******************************************************************************/
 package de.devboost.eclipse.jdtutilities;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -35,6 +38,10 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 public class ClassDependencyUtility {
+	
+	private interface IReferenceFinder {
+		public Set<String> find(String path) throws CoreException;
+	}
 
 	private class DependencySearchRequestor extends SearchRequestor {
 		
@@ -53,32 +60,101 @@ public class ClassDependencyUtility {
 			}
 		}
 	}
-	
-	public Set<String> findDependencies(String path) throws CoreException {
-		return searchReferences(path);
+
+	/**
+	 * Returns the paths of all Java elements that reference the element at the 
+	 * given path.
+	 */
+	public Set<String> findReferencesTo(String path) throws CoreException {
+		return find(path, IJavaSearchConstants.REFERENCES);
 	}
 
-	private Set<String> searchReferences(String path) throws CoreException {
-		// mark this element as visited
-		IType[] types = new JDTUtility().getJavaTypes(path);
-		if (types == null) {
-			return Collections.emptySet();
+	private Set<String> findTransitively(String path, IReferenceFinder finder) throws CoreException {
+		Set<String> references = new LinkedHashSet<String>();
+		Set<String> pathsToVisit = new LinkedHashSet<String>();
+		pathsToVisit.add(path);
+		while (!pathsToVisit.isEmpty()) {
+			// search for new elements
+			Iterator<String> iterator = pathsToVisit.iterator();
+			String nextPath = iterator.next();
+			iterator.remove();
+
+			if (!references.contains(nextPath)) {
+				Set<String> dependencies = finder.find(nextPath);
+				pathsToVisit.addAll(dependencies);
+			}
+
+			references.add(nextPath);
 		}
-		if (types.length == 0) {
-			return Collections.emptySet();
+		return references;
+	}
+	
+	/**
+	 * Returns the paths of all Java elements that reference the element at the 
+	 * given path. Also, elements that reference these elements (and so on) are
+	 * returned.
+	 * 
+	 * @return a set of transitive references 
+	 */
+	public Set<String> findReferencesFromTransitively(String path) throws CoreException {
+		return findTransitively(path, new IReferenceFinder() {
+			
+			@Override
+			public Set<String> find(String path) throws CoreException {
+				return findReferencesFrom(path);
+			}
+		});
+	}
+
+	/**
+	 * Returns the paths of all Java elements that are references by the element 
+	 * at the given path.
+	 */
+	public Set<String> findReferencesFrom(String path) throws CoreException {
+		Set<String> result = new LinkedHashSet<String>();
+		List<IType> types = getTypes(path);
+		if (types.isEmpty()) {
+			return result;
+		}
+		
+		SearchEngine engine = new SearchEngine();
+		SearchRequestor requestor = new DependencySearchRequestor(result);
+		IProgressMonitor monitor = new NullProgressMonitor();
+		for (IType type : types) {
+			engine.searchDeclarationsOfReferencedTypes(type, requestor, monitor);
+		}
+		return result;
+	}
+
+	private Set<String> find(String path, int searchType) throws CoreException {
+		Set<String> result = new LinkedHashSet<String>();
+		// mark this element as visited
+		List<IType> types = getTypes(path);
+		if (types.isEmpty()) {
+			return result;
 		}
 		
 		SearchEngine engine = new SearchEngine();
 		SearchParticipant[] participants = new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
 		IJavaSearchScope scope = createScope();
-		Set<String> result = new LinkedHashSet<String>();
 		SearchRequestor requestor = new DependencySearchRequestor(result);
 		IProgressMonitor monitor = new NullProgressMonitor();
 		for (IType type : types) {
-			SearchPattern pattern = SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES);
+			SearchPattern pattern = SearchPattern.createPattern(type, searchType);
 			engine.search(pattern, participants, scope, requestor, monitor);
 		}
 		return result;
+	}
+
+	private List<IType> getTypes(String path) throws JavaModelException {
+		IType[] types = new JDTUtility().getJavaTypes(path);
+		if (types == null) {
+			return Collections.emptyList();
+		}
+		if (types.length == 0) {
+			return Collections.emptyList();
+		}
+		return Arrays.asList(types);
 	}
 
 	@SuppressWarnings("restriction")
