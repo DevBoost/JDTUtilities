@@ -21,11 +21,17 @@ import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMemberValuePair;
@@ -35,6 +41,67 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 public class JDTUtility {
+
+	/**
+	 * Returns true if the given project has the JDT nature.
+	 */
+	public boolean isJavaProject(IProject project) {
+		if (project == null) {
+			return false;
+		}
+		try {
+			return project.isNatureEnabled("org.eclipse.jdt.core.javanature");
+		} catch (CoreException e) {
+		}
+		return false;
+	}
+
+	public IJavaProject getJavaProject(IProject project) {
+		return (isJavaProject(project) ? JavaCore.create(project) : null);
+	}
+
+	public IJavaProject getJavaProject(IResource resource) {
+		return getJavaProject(resource.getProject());
+	}
+
+	public IType[] getJavaTypes(String path) throws JavaModelException {
+		IJavaElement javaElement = getJavaElement(path);
+		if (javaElement instanceof IClassFile) {
+			IClassFile classFile = (IClassFile) javaElement;
+			return new IType[] {classFile.getType()};
+		}
+		if (javaElement instanceof ICompilationUnit) {
+			ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
+			IType[] types = compilationUnit.getTypes();
+			return types;
+		}
+		return null;
+	}
+
+	public IJavaElement getJavaElement(String path) throws JavaModelException {
+		
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		IFile file = root.getFile(new Path(path));
+		IJavaProject javaProject = getJavaProject(file);
+		if (javaProject == null) {
+			// TODO logError("Java project for file not found: " + path, null);
+			return null;
+		}
+		IPackageFragmentRoot[] roots = javaProject.getPackageFragmentRoots();
+		for (IPackageFragmentRoot packageFragmentRoot : roots) {
+			IPath fragmentPath = packageFragmentRoot.getPath();
+			String fragmentPathString = fragmentPath.toString();
+			if (path.startsWith(fragmentPathString + "/")) {
+				// resource is contained in this package fragment root
+				String classPathRelativePath = path.substring(fragmentPathString.length() + 1);
+				IJavaElement element = javaProject.findElement(new Path(classPathRelativePath));
+				if (element != null) {
+					return element;
+				}
+			}
+		}
+ 		return null;
+	}
 
 	public IType getType(String projectName, String qualifiedName) {
 		
