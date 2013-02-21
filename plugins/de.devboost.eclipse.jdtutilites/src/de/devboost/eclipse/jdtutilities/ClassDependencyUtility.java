@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006-2012
+ * Copyright (c) 2006-2013
  * Software Technology Group, Dresden University of Technology
  * DevBoost GmbH, Berlin, Amtsgericht Charlottenburg, HRB 140026
  * 
@@ -37,6 +37,10 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+/**
+ * The {@link ClassDependencyUtility} can be used to retrieve information about
+ * dependencies between Java classes using the Eclipse JDT search engine.
+ */
 public class ClassDependencyUtility {
 	
 	private interface IReferenceFinder {
