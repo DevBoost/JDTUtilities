@@ -59,15 +59,20 @@ public abstract class AbstractCompilationParticipant extends CompilationParticip
 	public void buildFinished(IJavaProject project) {
 		super.buildFinished(project);
 		
-		// we use an iterator to avoid ConcurrentModificationExceptions
-		List<CompilationEvent> events = new ArrayList<CompilationEvent>();
-		Iterator<CompilationEvent> it = files.iterator();
-		while (it.hasNext()) {
-			CompilationEvent event = it.next();
-			events.add(event);
-			it.remove();
+		try {
+			// we use an iterator to avoid ConcurrentModificationExceptions
+			List<CompilationEvent> events = new ArrayList<CompilationEvent>();
+			Iterator<CompilationEvent> it = files.iterator();
+			while (it.hasNext()) {
+				CompilationEvent event = it.next();
+				events.add(event);
+				it.remove();
+			}
+			buildFinished(events);
+		} catch (Throwable t) {
+			// TODO: handle exception
+			t.printStackTrace();
 		}
-		buildFinished(events);
 	}
 	
 	@Override
