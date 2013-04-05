@@ -2,7 +2,7 @@
 <feature
       id="de.devboost.eclipse.jdtutilities"
       label="JDTUtilities"
-      version="1.0.2"
+      version="1.0.3"
       provider-name="DevBoost GmbH - Germany">
 
 	<description>JDTUtilities - A set of utility classes that ease working with the Eclipse JDT.</description>
