@@ -46,6 +46,14 @@ public class NatureUtility {
 		project.setDescription(description, null);
 	}
 
+	/**
+	 * Adds a builder to a project.
+	 * 
+	 * @param project the project to modify
+	 * @param builderId the ID of the builder to add
+	 * 
+	 * @throws CoreException if adding the project builder fails
+	 */
 	public void addBuilder(IProject project, String builderId) throws CoreException {
 		IProjectDescription desc = project.getDescription();
 		ICommand[] commands = desc.getBuildSpec();
@@ -70,6 +78,14 @@ public class NatureUtility {
 		project.setDescription(desc, null);
 	}
 	
+	/**
+	 * Removes a builder from a project.
+	 * 
+	 * @param project the project to modify
+	 * @param builderId the ID of the builder to remove
+	 * 
+	 * @throws CoreException if removing the project builder fails
+	 */
 	public void removeBuilder(IProject project, String builderId) throws CoreException {
 		IProjectDescription description = project.getDescription();
 		ICommand[] commands = description.getBuildSpec();
