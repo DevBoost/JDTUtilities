@@ -56,14 +56,26 @@ public class JDTUtility {
 		return false;
 	}
 
+	/**
+	 * Returns the Java project that corresponds to the given project or 
+	 * <code>null</code> if the project is not a Java project.
+	 */
 	public IJavaProject getJavaProject(IProject project) {
 		return (isJavaProject(project) ? JavaCore.create(project) : null);
 	}
 
+	/**
+	 * Returns the Java project that contains the given resource or 
+	 * <code>null</code> if the resource is not part of a Java project.
+	 */
 	public IJavaProject getJavaProject(IResource resource) {
 		return getJavaProject(resource.getProject());
 	}
 
+	/**
+	 * Returns all Java types that are contained in the resource located at the
+	 * given path. The path may point to compiled or source code.
+	 */
 	public IType[] getJavaTypes(String path) throws JavaModelException {
 		IJavaElement javaElement = getJavaElement(path);
 		if (javaElement instanceof IClassFile) {
@@ -78,15 +90,20 @@ public class JDTUtility {
 		return null;
 	}
 
+	/**
+	 * Returns the Java element contained in the resource located at the
+	 * given path or <code>null</code> if the resource does not contain a Java
+	 * element.
+	 */
 	public IJavaElement getJavaElement(String path) throws JavaModelException {
 		
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IFile file = root.getFile(new Path(path));
 		IJavaProject javaProject = getJavaProject(file);
 		if (javaProject == null) {
-			// TODO logError("Java project for file not found: " + path, null);
 			return null;
 		}
+		
 		IPackageFragmentRoot[] roots = javaProject.getPackageFragmentRoots();
 		for (IPackageFragmentRoot packageFragmentRoot : roots) {
 			IPath fragmentPath = packageFragmentRoot.getPath();
@@ -103,6 +120,11 @@ public class JDTUtility {
  		return null;
 	}
 
+	/**
+	 * Returns the Java type that has the given qualified name and is contained
+	 * in a project with the given name. If no type is found, <code>null</code> 
+	 * is returned.
+	 */
 	public IType getType(String projectName, String qualifiedName) {
 		
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -140,6 +162,10 @@ public class JDTUtility {
 		return packageName;
 	}
 
+	/**
+	 * Checks whether the given element is a Java source folder (i.e. a JDT
+	 * package fragment root).
+	 */
 	private boolean isSourceFolder(IContainer element) {
 		IJavaElement javaElement = JavaCore.create(element);
 		if (javaElement instanceof IPackageFragmentRoot) {
@@ -149,8 +175,8 @@ public class JDTUtility {
 			return true;
 		}
 		if (element.getParent() instanceof IProject) {
-			//if no source was found so far, assume that the upper most
-			//folder is (intended to be) a source folder.
+			// if no source was found so far, assume that the upper most
+			// folder is (intended to be) a source folder.
 			return true;
 		}
 		return false;
@@ -187,13 +213,16 @@ public class JDTUtility {
 		return getAnnotationPropertyValue(annotation, annotationProperty);
 	}
 
+	/**
+	 * Returns the value of the given property and Java annotation.
+	 */
 	public Object getAnnotationPropertyValue(IAnnotation annotation,
-			String annotationProperty) {
+			String annotationPropertyName) {
 		try {
 			IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
 			for (IMemberValuePair memberValuePair : memberValuePairs) {
 				String memberName = memberValuePair.getMemberName();
-				if (annotationProperty.equals(memberName)) {
+				if (annotationPropertyName.equals(memberName)) {
 					Object value = memberValuePair.getValue();
 					return value;
 				}
