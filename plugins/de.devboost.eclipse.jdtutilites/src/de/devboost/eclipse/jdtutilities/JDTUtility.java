@@ -232,4 +232,20 @@ public class JDTUtility {
 		}
 		return null;
 	}
+
+	/**
+	 * Returns the compilation unit contained in the give file or
+	 * <code>null</code> if the file does not contain a compilation unit.
+	 */
+	public ICompilationUnit getCompilationUnit(IFile file) {
+		// determine compilation unit that is contained in the file
+		IJavaElement javaElement = JavaCore.create(file);
+		if (!javaElement.exists()) {
+			return null;
+		}
+		if (javaElement instanceof ICompilationUnit) {
+			return (ICompilationUnit) javaElement;
+		}
+		return null;
+	}
 }
