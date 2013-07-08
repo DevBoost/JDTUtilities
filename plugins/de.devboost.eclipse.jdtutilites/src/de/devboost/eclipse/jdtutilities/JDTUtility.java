@@ -39,6 +39,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public class JDTUtility {
 
@@ -248,4 +251,12 @@ public class JDTUtility {
 		}
 		return null;
 	}
+
+	public CompilationUnit parse(ICompilationUnit unit) {
+        ASTParser parser = ASTParser.newParser(AST.JLS4);
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+        parser.setSource(unit);
+        parser.setResolveBindings(true);
+        return (CompilationUnit) parser.createAST(null);
+    }
 }
