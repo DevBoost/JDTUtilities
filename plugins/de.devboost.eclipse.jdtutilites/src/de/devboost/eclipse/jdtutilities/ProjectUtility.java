@@ -70,7 +70,7 @@ public abstract class ProjectUtility {
 	}
 
 	// This code is copied from org.eclipse.debug.core.model.LaunchConfigurationDelegate.
-	private boolean hasProblems(IProject project) {
+	public boolean hasProblems(IProject project) {
 		try {
 			IMarker[] markers = project.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 			int markerCount = markers.length;
