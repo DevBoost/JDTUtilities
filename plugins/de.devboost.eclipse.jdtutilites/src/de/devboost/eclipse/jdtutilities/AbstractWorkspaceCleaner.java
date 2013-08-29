@@ -13,9 +13,6 @@
  ******************************************************************************/
 package de.devboost.eclipse.jdtutilities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -34,19 +31,20 @@ import org.eclipse.core.runtime.jobs.Job;
 public abstract class AbstractWorkspaceCleaner {
 
 	public void performCleanBuildIfRequired() {
-		List<Job> jobs = createRefreshWorkspaceOnFirstStartupJobs();
-		for (Job job : jobs) {
-			job.schedule();
+		Job job = createRefreshWorkspaceOnFirstStartupJob();
+		if (job == null) {
+			return;
 		}
 	}
 
-	private List<Job> createRefreshWorkspaceOnFirstStartupJobs() {
-		List<Job> jobs = new ArrayList<Job>();
+	private Job createRefreshWorkspaceOnFirstStartupJob() {
 		if (mustClean()) {
-			jobs.add(createCleanAllJob());
+			Job job = createCleanAllJob();
 			setCleaned();
+			return job;
+		} else {
+			return null;
 		}
-		return jobs;
 	}
 
 	protected abstract void setCleaned();
