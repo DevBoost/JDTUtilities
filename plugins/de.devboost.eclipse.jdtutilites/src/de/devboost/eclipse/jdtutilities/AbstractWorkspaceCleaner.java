@@ -55,6 +55,8 @@ public abstract class AbstractWorkspaceCleaner {
 	
 	protected abstract void logException(CoreException ce);
 
+	protected abstract void logInfo(String message);
+
 	private Job createCleanAllJob() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
