@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.jobs.Job;
 public abstract class AbstractWorkspaceCleaner {
 
 	public void performCleanBuildIfRequired() {
+		logInfo("Checking if clean build is required.");
 		Job job = createRefreshWorkspaceOnFirstStartupJob();
 		if (job == null) {
 			return;
@@ -39,10 +40,12 @@ public abstract class AbstractWorkspaceCleaner {
 
 	private Job createRefreshWorkspaceOnFirstStartupJob() {
 		if (mustClean()) {
+			logInfo("Clean build is required. Scheduling clean workspace job.");
 			Job job = createCleanAllJob();
 			setCleaned();
 			return job;
 		} else {
+			logInfo("No clean build is required.");
 			return null;
 		}
 	}
