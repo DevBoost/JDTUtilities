@@ -36,13 +36,13 @@ public abstract class AbstractWorkspaceCleaner {
 		if (job == null) {
 			return;
 		}
+		job.schedule();
 	}
 
 	private Job createRefreshWorkspaceOnFirstStartupJob() {
 		if (mustClean()) {
 			logInfo("Clean build is required. Scheduling clean workspace job.");
 			Job job = createCleanAllJob();
-			setCleaned();
 			return job;
 		} else {
 			logInfo("No clean build is required.");
@@ -73,6 +73,7 @@ public abstract class AbstractWorkspaceCleaner {
 						logException(ce);
 					}
 				}
+				setCleaned();
 				return Status.OK_STATUS;
 			}
 		};
