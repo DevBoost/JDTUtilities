@@ -66,7 +66,9 @@ public abstract class AbstractWorkspaceCleaner {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				logInfo("Cleaning workspace.");
 				for (IProject project : projects) {
+					logInfo("Cleaning project " + project.getName());
 					try {
 						project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
 					} catch (CoreException ce) {
