@@ -13,15 +13,6 @@
  ******************************************************************************/
 package de.devboost.eclipse.jdtutilities;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 /**
@@ -54,39 +45,29 @@ public abstract class AbstractWorkspaceCleaner {
 
 	protected abstract boolean mustClean();
 	
-	protected abstract void logException(CoreException ce);
+	protected abstract void logException(Exception e);
 
 	protected abstract void logInfo(String message);
 
 	private Job createCleanAllJob() {
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IWorkspaceRoot root = workspace.getRoot();
-		final IProject[] projects = root.getProjects();
-		Job cleanAllJob = new Job("Clean workspace") {
+		Job cleanAllJob = new AbstractCleanWorkspaceJob() {
 
 			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				logInfo("Cleaning workspace.");
-				for (IProject project : projects) {
-					logInfo("Cleaning project " + project.getName());
-					try {
-						project.build(IncrementalProjectBuilder.CLEAN_BUILD, monitor);
-					} catch (CoreException ce) {
-						logException(ce);
-					}
-					
-					logInfo("Building project " + project.getName());
-					try {
-						project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-					} catch (CoreException ce) {
-						logException(ce);
-					}
-				}
-				setCleaned();
-				return Status.OK_STATUS;
+			protected void setCleaned() {
+				AbstractWorkspaceCleaner.this.setCleaned();
 			}
+
+			@Override
+			protected void logException(Exception e) {
+				AbstractWorkspaceCleaner.this.logException(e);
+			}
+
+			@Override
+			protected void logInfo(String message) {
+				AbstractWorkspaceCleaner.this.logInfo(message);
+			}
+			
 		};
-		cleanAllJob.setRule(root);
 		return cleanAllJob;
 	}
 }
