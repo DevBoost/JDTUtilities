@@ -74,6 +74,13 @@ public abstract class AbstractWorkspaceCleaner {
 					} catch (CoreException ce) {
 						logException(ce);
 					}
+					
+					logInfo("Building project " + project.getName());
+					try {
+						project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+					} catch (CoreException ce) {
+						logException(ce);
+					}
 				}
 				setCleaned();
 				return Status.OK_STATUS;
