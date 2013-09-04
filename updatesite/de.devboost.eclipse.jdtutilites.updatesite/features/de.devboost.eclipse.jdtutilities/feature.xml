@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="de.devboost.eclipse.jdtutilities"
-      label="JDTUtilities"
-      version="1.0.4"
-      provider-name="DevBoost GmbH - Germany">
+		id="de.devboost.eclipse.jdtutilities"
+		label="JDTUtilities"
+		version="1.0.5"
+		provider-name="DevBoost GmbH - Germany">
 
 	<description>JDTUtilities - A set of utility classes that ease working with the Eclipse JDT.</description>
 
@@ -19,18 +19,13 @@ All rights reserved. This program and the accompanying materials are made availa
 Contributors:
   DevBoost GmbH - Berlin, Germany
      - initial API and implementation
-   </license>
-   
-   <requires>
-      <import feature="org.eclipse.platform"/>
-      <import feature="org.eclipse.jdt"/>
-   </requires>
+	</license>
 
-   <plugin
-         id="de.devboost.eclipse.jdtutilities"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+	<requires>
+		<import feature="org.eclipse.platform"/>
+		<import feature="org.eclipse.jdt"/>
+	</requires>
+
+	<plugin id="de.devboost.eclipse.jdtutilities" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
 
 </feature>
