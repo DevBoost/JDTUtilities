@@ -40,6 +40,10 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 /**
  * The {@link ClassDependencyUtility} can be used to retrieve information about
  * dependencies between Java classes using the Eclipse JDT search engine.
+ * 
+ * Note: This class allows to find dependencies between classes which are 
+ * located in the workspace only. It cannot be used to analyze dependencies to
+ * classes located in the running Eclipse instance or the JDK.
  */
 public class ClassDependencyUtility {
 	
