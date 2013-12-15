@@ -45,7 +45,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
  * located in the workspace only. It cannot be used to analyze dependencies to
  * classes located in the running Eclipse instance or the JDK.
  */
-public class ClassDependencyUtility {
+public abstract class ClassDependencyUtility {
 	
 	private interface IReferenceFinder {
 		public Set<String> find(String path) throws CoreException;
@@ -155,7 +155,15 @@ public class ClassDependencyUtility {
 	}
 
 	private List<IType> getTypes(String path) throws JavaModelException {
-		IType[] types = new JDTUtility().getJavaTypes(path);
+		JDTUtility jdtUtility = new JDTUtility() {
+
+			@Override
+			protected void logWarning(String message, Exception e) {
+				ClassDependencyUtility.this.logWarning(message, e);
+			}
+			
+		};
+		IType[] types = jdtUtility.getJavaTypes(path);
 		if (types == null) {
 			return Collections.emptyList();
 		}
@@ -182,4 +190,6 @@ public class ClassDependencyUtility {
 		String path = resource.getFullPath().toString();
 		result.add(path);
 	}
+
+	protected abstract void logWarning(String message, Exception e);
 }

@@ -93,7 +93,16 @@ public abstract class ProjectUtility {
 	}
 
 	private String[] getRequiredProjects(IProject project) {
-		IJavaProject javaProject = new JDTUtility().getJavaProject(project);
+		JDTUtility jdtUtility = new JDTUtility() {
+
+			@Override
+			protected void logWarning(String message, Exception e) {
+				ProjectUtility.this.logWarning(message, e);
+			}
+			
+		};
+		IJavaProject javaProject = jdtUtility.getJavaProject(project);
+		
 		if (javaProject != null) {
 			try {
 				String[] requiredProjectNames = javaProject.getRequiredProjectNames();
@@ -116,4 +125,6 @@ public abstract class ProjectUtility {
 	}
 
 	protected abstract void logError(String message, Exception e);
+	
+	protected abstract void logWarning(String message, Exception e);
 }

@@ -43,7 +43,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-public class JDTUtility {
+public abstract class JDTUtility {
 
 	/**
 	 * Returns true if the given project has the JDT nature.
@@ -184,6 +184,40 @@ public class JDTUtility {
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks whether the given EMF platform URI is located in an output folder
+	 * of the given, containing Java project.
+	 */
+	public boolean isInOutputFolder(IProject project, String platformURI) {
+		IJavaProject javaProject = getJavaProject(project);
+		if (javaProject == null) {
+			return false;
+		}
+		
+		// FIXME Handle projects that have multiple output locations.
+		
+		try {
+			IPath outputLocation = javaProject.getOutputLocation();
+			String outputPath = outputLocation.toString();
+			// We add a slash to the end of the path to make sure that the
+			// output directory (e.g., 'bin') is not only a prefix of the
+			// corresponding fragments in the URI (e.g., 'bind-src'), but really
+			// refers to the same directory.
+			if (!outputPath.endsWith("/")) {
+				outputPath = outputPath + "/";
+			}
+			if (platformURI.startsWith(outputPath)) {
+				return true;
+			}
+		} catch (JavaModelException e) {
+			logWarning("Can't determine output location for project " + javaProject.getElementName(), e);
+		}
+
+		return false;
+	}
+	
+	protected abstract void logWarning(String message, Exception e);
 
 	/**
 	 * Concatenates each element from the 'parts' collection and puts 'glue'
