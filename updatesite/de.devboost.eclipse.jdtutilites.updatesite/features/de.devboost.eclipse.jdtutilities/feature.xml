@@ -2,7 +2,7 @@
 <feature
       id="de.devboost.eclipse.jdtutilities"
       label="JDTUtilities"
-      version="1.0.7"
+      version="1.0.8"
       provider-name="DevBoost GmbH - Germany">
 
    <description>
