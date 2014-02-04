@@ -29,7 +29,7 @@ Contributors:
    <requires>
       <import feature="org.eclipse.platform"/>
       <import feature="org.eclipse.jdt"/>
-      <import feature="de.devboost.eclipse.jdtutilities.ui"/>
+      <import feature="de.devboost.eclipse.jdtutilities"/>
    </requires>
 
    <plugin
