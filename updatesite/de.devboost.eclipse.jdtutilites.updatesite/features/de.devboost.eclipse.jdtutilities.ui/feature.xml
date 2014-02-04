@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="de.devboost.eclipse.jdtutilities"
-      label="JDTUtilities"
+      id="de.devboost.eclipse.jdtutilities.ui"
+      label="JDTUtilities UI"
       version="1.0.8"
       provider-name="DevBoost GmbH - Germany">
 
    <description>
-      JDTUtilities - A set of utility classes that ease working with the Eclipse JDT.
+      JDTUtilities UI - A set of UI utility classes that ease working with the Eclipse JDT.
    </description>
 
    <copyright>
@@ -29,10 +29,12 @@ Contributors:
    <requires>
       <import feature="org.eclipse.platform"/>
       <import feature="org.eclipse.jdt"/>
+      <import feature="org.eclipse.ui"/>
+      <import feature="de.devboost.eclipse.jdtutilities.ui"/>
    </requires>
 
    <plugin
-         id="de.devboost.eclipse.jdtutilities"
+         id="de.devboost.eclipse.jdtutilities.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
