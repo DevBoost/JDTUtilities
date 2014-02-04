@@ -68,6 +68,23 @@ public abstract class JDTUtility {
 	}
 
 	/**
+	 * Returns the Java project that corresponds to the given name or 
+	 * <code>null</code> if the project cannot be found.
+	 */
+	public IJavaProject getJavaProject(String projectName) {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot root = workspace.getRoot();
+		IProject project = root.getProject(projectName);
+		if (project == null) {
+			return null;
+		}
+		if (!project.exists()) {
+			return null;
+		}
+		return getJavaProject(project);
+	}
+
+	/**
 	 * Returns the Java project that contains the given resource or 
 	 * <code>null</code> if the resource is not part of a Java project.
 	 */
