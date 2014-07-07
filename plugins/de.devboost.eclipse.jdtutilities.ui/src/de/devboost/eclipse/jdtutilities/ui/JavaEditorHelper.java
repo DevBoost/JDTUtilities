@@ -2,6 +2,7 @@ package de.devboost.eclipse.jdtutilities.ui;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -74,7 +75,16 @@ public class JavaEditorHelper {
 	}
 
 	public JavaEditor getJavaEditor(ICompilationUnit compilationUnit) {
-		if (compilationUnit.getResource().exists()) {
+		if (compilationUnit == null) {
+			return null;
+		}
+		
+		IResource resource = compilationUnit.getResource();
+		if (resource == null) {
+			return null;
+		}
+		
+		if (resource.exists()) {
 			IEditorPart part = null;
 			part = EditorUtility.isOpenInEditor(compilationUnit);
 			if (part == null) {
