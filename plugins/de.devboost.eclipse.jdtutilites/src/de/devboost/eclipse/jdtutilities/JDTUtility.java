@@ -303,6 +303,25 @@ public abstract class JDTUtility {
 		return null;
 	}
 
+	/**
+	 * Returns the type that is contained in the given file. The file must be a
+	 * Java class file. If the file does not exists or if it is not a class
+	 * file, <code>null</code> is returned.
+	 */
+	public IType getType(IFile file) {
+		IJavaElement javaElement = JavaCore.create(file);
+		if (!javaElement.exists()) {
+			return null;
+		}
+		
+		if (javaElement instanceof IClassFile) {
+			IClassFile classFile = (IClassFile) javaElement;
+			return classFile.getType();
+		}
+		
+		return null;
+	}
+	
 	public CompilationUnit parse(ICompilationUnit unit) {
         ASTParser parser = ASTParser.newParser(AST.JLS4);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
