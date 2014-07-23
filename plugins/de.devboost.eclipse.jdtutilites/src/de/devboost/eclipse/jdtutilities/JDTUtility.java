@@ -288,15 +288,21 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Returns the compilation unit contained in the give file or
-	 * <code>null</code> if the file does not contain a compilation unit.
+	 * Returns the compilation unit contained in the given file or
+	 * <code>null</code> if the file does not contain a compilation unit or if
+	 * the file does not exist or if the JDT is not running.
 	 */
 	public ICompilationUnit getCompilationUnit(IFile file) {
 		// determine compilation unit that is contained in the file
 		IJavaElement javaElement = JavaCore.create(file);
+		if (javaElement == null) {
+			return null;
+		}
+		
 		if (!javaElement.exists()) {
 			return null;
 		}
+		
 		if (javaElement instanceof ICompilationUnit) {
 			return (ICompilationUnit) javaElement;
 		}
