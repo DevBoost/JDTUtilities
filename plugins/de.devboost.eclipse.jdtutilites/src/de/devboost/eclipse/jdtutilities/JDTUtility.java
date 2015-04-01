@@ -1,6 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2012-2013
- * DevBoost GmbH, Berlin, Amtsgericht Charlottenburg, HRB 140026
+ * Copyright (c) 2012-2015
+ * DevBoost GmbH, Dresden, Amtsgericht Dresden, HRB 34001
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
- *   DevBoost GmbH - Berlin, Germany
+ *   DevBoost GmbH - Dresden, Germany
  *      - initial API and implementation
  ******************************************************************************/
 package de.devboost.eclipse.jdtutilities;
@@ -225,6 +225,33 @@ public abstract class JDTUtility {
 				outputPath = outputPath + "/";
 			}
 			if (platformURI.startsWith(outputPath)) {
+				return true;
+			}
+		} catch (JavaModelException e) {
+			logWarning("Can't determine output location for project " + javaProject.getElementName(), e);
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Checks whether the given path is the output path of the given project. If the project is not a Java project,
+	 * <code>false</code> is returned.
+	 */
+	public boolean isOutputFolder(IProject project, IPath path) {
+		IJavaProject javaProject = getJavaProject(project);
+		if (javaProject == null) {
+			return false;
+		}
+		
+		// FIXME Handle projects that have multiple output locations.
+		
+		try {
+			IPath outputLocation = javaProject.getOutputLocation();
+			if (outputLocation == null) {
+				return false;
+			}
+			if (outputLocation.equals(path)) {
 				return true;
 			}
 		} catch (JavaModelException e) {
