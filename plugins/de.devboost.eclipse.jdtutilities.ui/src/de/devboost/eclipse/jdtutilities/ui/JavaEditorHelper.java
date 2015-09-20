@@ -23,6 +23,15 @@ import org.eclipse.ui.PartInitException;
 
 @SuppressWarnings("restriction")
 public class JavaEditorHelper {
+	
+	public final static JavaEditorHelper INSTANCE = new JavaEditorHelper();
+
+	/**
+	 * Use {@link #INSTANCE} instead.
+	 */
+	@Deprecated
+	public JavaEditorHelper() {
+	}
 
 	public void switchToJavaEditor(IType type, String methodName, List<String> parameterTypes) {
 		ICompilationUnit unit = type.getCompilationUnit();
