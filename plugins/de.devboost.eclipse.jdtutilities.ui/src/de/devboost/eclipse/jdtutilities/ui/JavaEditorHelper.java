@@ -34,27 +34,30 @@ public class JavaEditorHelper {
 	}
 
 	public void switchToJavaEditor(IType type, String methodName, List<String> parameterTypes) {
-		ICompilationUnit unit = type.getCompilationUnit();
-		JavaEditor javaEditor = getJavaEditor(unit);
-		if(javaEditor != null){
-			IMethod newMethod = null;
-			try {
-				String[] parameterTypeSignatures = new String[parameterTypes.size()];
-				for (int i = 0; i < parameterTypeSignatures.length; i++) {
-					String qualifiedName = parameterTypes.get(i);
-					String signature = Signature.createTypeSignature(qualifiedName, true);
-					parameterTypeSignatures[i] = signature;
-				}
-
-				newMethod = JavaModelUtil.findMethod(methodName, parameterTypeSignatures, false, type);
-			} catch (JavaModelException e) {
-				// ignore this
-			}
-			if (newMethod == null) {
-				return;
-			}
-			javaEditor.setSelection(newMethod);
+		JavaEditor javaEditor = openJavaEditor(type);
+		if (javaEditor == null) {
+			return;
 		}
+		
+		IMethod newMethod = null;
+		try {
+			String[] parameterTypeSignatures = new String[parameterTypes.size()];
+			for (int i = 0; i < parameterTypeSignatures.length; i++) {
+				String qualifiedName = parameterTypes.get(i);
+				String signature = Signature.createTypeSignature(qualifiedName, true);
+				parameterTypeSignatures[i] = signature;
+			}
+
+			newMethod = JavaModelUtil.findMethod(methodName, parameterTypeSignatures, false, type);
+		} catch (JavaModelException e) {
+			// ignore this
+		}
+		
+		if (newMethod == null) {
+			return;
+		}
+		
+		javaEditor.setSelection(newMethod);
 	}
 
 	public void switchToJavaEditor(ICompilationUnit unit, int lineNumber) {
@@ -93,29 +96,36 @@ public class JavaEditorHelper {
 			return null;
 		}
 		
-		if (resource.exists()) {
-			IEditorPart part = null;
-			part = EditorUtility.isOpenInEditor(compilationUnit);
-			if (part == null) {
-				try {
-					part = JavaUI.openInEditor(compilationUnit);
-				} catch (PartInitException e) {
-					// ignore
-				} catch (JavaModelException e) {
-					// ignore
-				}
-			}
-			IWorkbenchPage page = JavaPlugin.getActivePage();
-			if (page != null && part != null) {
-				page.bringToTop(part);
-			}
-			if (part != null) {
-				part.setFocus();
-			}
-			if (part instanceof JavaEditor) {
-				return (JavaEditor) part;
+		if (!resource.exists()) {
+			return null;
+		}
+		
+		return openJavaEditor(compilationUnit);
+	}
+
+	public JavaEditor openJavaEditor(IJavaElement javaElement) {
+		IEditorPart part = EditorUtility.isOpenInEditor(javaElement);
+		if (part == null) {
+			try {
+				part = JavaUI.openInEditor(javaElement);
+			} catch (PartInitException e) {
+				// ignore
+			} catch (JavaModelException e) {
+				// ignore
 			}
 		}
+		
+		IWorkbenchPage page = JavaPlugin.getActivePage();
+		if (page != null && part != null) {
+			page.bringToTop(part);
+		}
+		if (part != null) {
+			part.setFocus();
+		}
+		if (part instanceof JavaEditor) {
+			return (JavaEditor) part;
+		}
+		
 		return null;
 	}
 
