@@ -81,7 +81,7 @@ public class JavaEditorHelper {
 
 	public void switchToJavaEditor(ICompilationUnit compilationUnit, IJavaElement javaElement) {
 		JavaEditor javaEditor = getJavaEditor(compilationUnit);
-		if(javaEditor != null){
+		if (javaEditor != null) {
 			javaEditor.setSelection(javaElement);
 		}
 	}
