@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,16 +61,15 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Returns the Java project that corresponds to the given project or 
-	 * <code>null</code> if the project is not a Java project.
+	 * Returns the Java project that corresponds to the given project or <code>null</code> if the project is not a Java
+	 * project.
 	 */
 	public IJavaProject getJavaProject(IProject project) {
 		return (isJavaProject(project) ? JavaCore.create(project) : null);
 	}
 
 	/**
-	 * Returns the Java project that corresponds to the given name or 
-	 * <code>null</code> if the project cannot be found.
+	 * Returns the Java project that corresponds to the given name or <code>null</code> if the project cannot be found.
 	 */
 	public IJavaProject getJavaProject(String projectName) {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -85,22 +85,22 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Returns the Java project that contains the given resource or 
-	 * <code>null</code> if the resource is not part of a Java project.
+	 * Returns the Java project that contains the given resource or <code>null</code> if the resource is not part of a
+	 * Java project.
 	 */
 	public IJavaProject getJavaProject(IResource resource) {
 		return getJavaProject(resource.getProject());
 	}
 
 	/**
-	 * Returns all Java types that are contained in the resource located at the
-	 * given path. The path may point to compiled or source code.
+	 * Returns all Java types that are contained in the resource located at the given path. The path may point to
+	 * compiled or source code.
 	 */
 	public IType[] getJavaTypes(String path) throws JavaModelException {
 		IJavaElement javaElement = getJavaElement(path);
 		if (javaElement instanceof IClassFile) {
 			IClassFile classFile = (IClassFile) javaElement;
-			return new IType[] {classFile.getType()};
+			return new IType[] { classFile.getType() };
 		}
 		if (javaElement instanceof ICompilationUnit) {
 			ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
@@ -111,19 +111,18 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Returns the Java element contained in the resource located at the
-	 * given path or <code>null</code> if the resource does not contain a Java
-	 * element.
+	 * Returns the Java element contained in the resource located at the given path or <code>null</code> if the resource
+	 * does not contain a Java element.
 	 */
 	public IJavaElement getJavaElement(String path) throws JavaModelException {
-		
+
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IFile file = root.getFile(new Path(path));
 		IJavaProject javaProject = getJavaProject(file);
 		if (javaProject == null) {
 			return null;
 		}
-		
+
 		IPackageFragmentRoot[] roots = javaProject.getPackageFragmentRoots();
 		for (IPackageFragmentRoot packageFragmentRoot : roots) {
 			IPath fragmentPath = packageFragmentRoot.getPath();
@@ -137,16 +136,15 @@ public abstract class JDTUtility {
 				}
 			}
 		}
- 		return null;
+		return null;
 	}
 
 	/**
-	 * Returns the Java type that has the given qualified name and is contained
-	 * in a project with the given name. If no type is found, <code>null</code> 
-	 * is returned.
+	 * Returns the Java type that has the given qualified name and is contained in a project with the given name. If no
+	 * type is found, <code>null</code> is returned.
 	 */
 	public IType getType(String projectName, String qualifiedName) {
-		
+
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		IProject project = root.getProject(projectName);
@@ -183,8 +181,7 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Checks whether the given element is a Java source folder (i.e. a JDT
-	 * package fragment root).
+	 * Checks whether the given element is a Java source folder (i.e. a JDT package fragment root).
 	 */
 	private boolean isSourceFolder(IContainer element) {
 		IJavaElement javaElement = JavaCore.create(element);
@@ -201,30 +198,28 @@ public abstract class JDTUtility {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * Checks whether the given EMF platform URI is located in an output folder
-	 * of the given, containing Java project.
+	 * Checks whether the given EMF platform URI is located in an output folder of the given, containing Java project.
 	 */
 	public boolean isInOutputFolder(IProject project, String platformURI) {
 		IJavaProject javaProject = getJavaProject(project);
 		if (javaProject == null) {
 			return false;
 		}
-		
-		// FIXME Handle projects that have multiple output locations.
-		
+
 		try {
-			IPath outputLocation = javaProject.getOutputLocation();
-			String outputPath = outputLocation.toString();
-			// We add a slash to the end of the path to make sure that the
-			// output directory (e.g., 'bin') is not only a prefix of the
-			// corresponding fragments in the URI (e.g., 'bind-src'), but really
-			// refers to the same directory.
-			if (!outputPath.endsWith("/")) {
-				outputPath = outputPath + "/";
+			// Handle projects that have multiple output locations.
+			IClasspathEntry[] classpathEntries = javaProject.getRawClasspath();
+			for (IClasspathEntry classpathEntry : classpathEntries) {
+				IPath outputLocation = classpathEntry.getOutputLocation();
+				if (isContained(outputLocation, platformURI)) {
+					return true;
+				}
 			}
-			if (platformURI.startsWith(outputPath)) {
+
+			IPath outputLocation = javaProject.getOutputLocation();
+			if (isContained(outputLocation, platformURI)) {
 				return true;
 			}
 		} catch (JavaModelException e) {
@@ -233,7 +228,31 @@ public abstract class JDTUtility {
 
 		return false;
 	}
-	
+
+	/**
+	 * Checks whether the given EMF platform URI is located in the given output folder.
+	 */
+	private boolean isContained(IPath outputLocation, String platformURI) {
+		if (outputLocation == null) {
+			return false;
+		}
+		
+		String outputPath = outputLocation.toString();
+		// We add a slash to the end of the path to make sure that the
+		// output directory (e.g., 'bin') is not only a prefix of the
+		// corresponding fragments in the URI (e.g., 'bind-src'), but really
+		// refers to the same directory.
+		if (!outputPath.endsWith("/")) {
+			outputPath = outputPath + "/";
+		}
+
+		if (platformURI.startsWith(outputPath)) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Checks whether the given path is the output path of the given project. If the project is not a Java project,
 	 * <code>false</code> is returned.
@@ -243,9 +262,9 @@ public abstract class JDTUtility {
 		if (javaProject == null) {
 			return false;
 		}
-		
+
 		// FIXME Handle projects that have multiple output locations.
-		
+
 		try {
 			IPath outputLocation = javaProject.getOutputLocation();
 			if (outputLocation == null) {
@@ -260,12 +279,11 @@ public abstract class JDTUtility {
 
 		return false;
 	}
-	
+
 	protected abstract void logWarning(String message, Exception e);
 
 	/**
-	 * Concatenates each element from the 'parts' collection and puts 'glue'
-	 * in between.
+	 * Concatenates each element from the 'parts' collection and puts 'glue' in between.
 	 */
 	// TODO move this method to some other utility project handling strings
 	private String explode(Collection<String> parts, String glue) {
@@ -282,11 +300,9 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Returns the value of the given annotation property. If no annotation or
-	 * property is found, null is returned.
+	 * Returns the value of the given annotation property. If no annotation or property is found, null is returned.
 	 */
-	public Object getAnnotationValue(IAnnotatable annotable, String simpleAnnotationName,
-			String annotationProperty) {
+	public Object getAnnotationValue(IAnnotatable annotable, String simpleAnnotationName, String annotationProperty) {
 		IAnnotation annotation = annotable.getAnnotation(simpleAnnotationName);
 		if (annotation == null) {
 			return null;
@@ -297,8 +313,7 @@ public abstract class JDTUtility {
 	/**
 	 * Returns the value of the given property and Java annotation.
 	 */
-	public Object getAnnotationPropertyValue(IAnnotation annotation,
-			String annotationPropertyName) {
+	public Object getAnnotationPropertyValue(IAnnotation annotation, String annotationPropertyName) {
 		try {
 			IMemberValuePair[] memberValuePairs = annotation.getMemberValuePairs();
 			for (IMemberValuePair memberValuePair : memberValuePairs) {
@@ -315,9 +330,8 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Returns the compilation unit contained in the given file or
-	 * <code>null</code> if the file does not contain a compilation unit or if
-	 * the file does not exist or if the JDT is not running.
+	 * Returns the compilation unit contained in the given file or <code>null</code> if the file does not contain a
+	 * compilation unit or if the file does not exist or if the JDT is not running.
 	 */
 	public ICompilationUnit getCompilationUnit(IFile file) {
 		// determine compilation unit that is contained in the file
@@ -325,11 +339,11 @@ public abstract class JDTUtility {
 		if (javaElement == null) {
 			return null;
 		}
-		
+
 		if (!javaElement.exists()) {
 			return null;
 		}
-		
+
 		if (javaElement instanceof ICompilationUnit) {
 			return (ICompilationUnit) javaElement;
 		}
@@ -337,29 +351,28 @@ public abstract class JDTUtility {
 	}
 
 	/**
-	 * Returns the type that is contained in the given file. The file must be a
-	 * Java class file. If the file does not exists or if it is not a class
-	 * file, <code>null</code> is returned.
+	 * Returns the type that is contained in the given file. The file must be a Java class file. If the file does not
+	 * exists or if it is not a class file, <code>null</code> is returned.
 	 */
 	public IType getType(IFile file) {
 		IJavaElement javaElement = JavaCore.create(file);
 		if (!javaElement.exists()) {
 			return null;
 		}
-		
+
 		if (javaElement instanceof IClassFile) {
 			IClassFile classFile = (IClassFile) javaElement;
 			return classFile.getType();
 		}
-		
+
 		return null;
 	}
-	
+
 	public CompilationUnit parse(ICompilationUnit unit) {
-        ASTParser parser = ASTParser.newParser(AST.JLS4);
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);
-        parser.setSource(unit);
-        parser.setResolveBindings(true);
-        return (CompilationUnit) parser.createAST(null);
-    }
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(unit);
+		parser.setResolveBindings(true);
+		return (CompilationUnit) parser.createAST(null);
+	}
 }
