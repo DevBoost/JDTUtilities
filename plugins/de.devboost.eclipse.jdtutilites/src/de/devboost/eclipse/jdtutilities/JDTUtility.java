@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015
+ * Copyright (c) 2012-2018
  * DevBoost GmbH, Dresden, Amtsgericht Dresden, HRB 34001
  * 
  * All rights reserved. This program and the accompanying materials
@@ -15,6 +15,7 @@ package de.devboost.eclipse.jdtutilities;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -92,10 +93,40 @@ public abstract class JDTUtility {
 		return getJavaProject(resource.getProject());
 	}
 
+	public List<IPath> getSourceFolders(IJavaProject javaProject) throws JavaModelException {
+		if (javaProject == null) {
+			return Collections.emptyList();
+		}
+
+		List<IPath> sourcePaths = new ArrayList<IPath>();
+		IPackageFragmentRoot[] allPackageFragmentRoots = javaProject.getAllPackageFragmentRoots();
+		for (IPackageFragmentRoot packageFragmentRoot : allPackageFragmentRoots) {
+			if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
+				IPath sourcePath = packageFragmentRoot.getPath();
+				sourcePaths.add(sourcePath);
+			}
+		}
+
+		return sourcePaths;
+	}
+
+	public boolean isInSourceFolder(IProject project, IFile file) throws JavaModelException {
+		IJavaProject javaProject = getJavaProject(project);
+		List<IPath> sourceFolders = getSourceFolders(javaProject);
+		for (IPath sourceFolder : sourceFolders) {
+			if (sourceFolder.matchingFirstSegments(file.getFullPath()) == sourceFolder.segmentCount()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Returns all Java types that are contained in the resource located at the given path. The path may point to
 	 * compiled or source code.
 	 */
+	@SuppressWarnings("deprecation")
 	public IType[] getJavaTypes(String path) throws JavaModelException {
 		IJavaElement javaElement = getJavaElement(path);
 		if (javaElement instanceof IClassFile) {
@@ -236,7 +267,7 @@ public abstract class JDTUtility {
 		if (outputLocation == null) {
 			return false;
 		}
-		
+
 		String outputPath = outputLocation.toString();
 		// We add a slash to the end of the path to make sure that the
 		// output directory (e.g., 'bin') is not only a prefix of the
@@ -354,6 +385,7 @@ public abstract class JDTUtility {
 	 * Returns the type that is contained in the given file. The file must be a Java class file. If the file does not
 	 * exists or if it is not a class file, <code>null</code> is returned.
 	 */
+	@SuppressWarnings("deprecation")
 	public IType getType(IFile file) {
 		IJavaElement javaElement = JavaCore.create(file);
 		if (!javaElement.exists()) {
